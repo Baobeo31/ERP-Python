@@ -9,7 +9,6 @@ class ProductRepository:
         db.commit()
         db.refresh(product)
         return product
-
     @staticmethod
     def get_by_id(db: Session, product_id: int):
         return db.query(Product).filter(Product.id == product_id).first()
@@ -22,5 +21,10 @@ class ProductRepository:
         db.add(product)
         db.commit()
         db.refresh(product)
+        return product
+    @staticmethod
+    def delete(db: Session, product: Product):
+        db.delete(product)
+        db.commit()
         return product
     

@@ -1,20 +1,35 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from decimal import Decimal
 from typing import Optional
-class ProductCreate(BaseModel):
-  code: str
-  name: str
-  price: Decimal
-  stock: int
 
-class ProductUpdate(BaseModel):
-   #update từng field một cách tùy chọn
-   code: Optional[str] = None
-   name: Optional[str] = None
-   price: Optional[Decimal] = None
-   stock: Optional[int] = None
-class ProductResponse(ProductCreate):
-  id:int
+class CategoryResponse(BaseModel): 
+    id: int
+    name: str
 
-  class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductBase(BaseModel):
+    code: str
+    name: str
+    price: Decimal
+    stock: int
+
+
+class ProductCreate(ProductBase):
+    category_id: Optional[int] = None
+
+
+class ProductUpdate(BaseModel): #Field nào gửi lên sẽ được cập nhật
+    code: Optional[str] = None
+    name: Optional[str] = None
+    price: Optional[Decimal] = None
+    stock: Optional[int] = None
+    category_id: Optional[int] = None
+
+
+class ProductResponse(ProductBase):
+    id: int
+    category: Optional[CategoryResponse] 
+
+    model_config = ConfigDict(from_attributes=True) 

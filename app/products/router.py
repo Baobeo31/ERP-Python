@@ -12,7 +12,7 @@ def get_db():
     yield db
   finally:
     db.close()
-
+# Tạo sản phẩm
 @router.post("/", response_model=ProductResponse) 
 def create_product(data: ProductCreate, db: Session = Depends(get_db)):
   return ProductService.create_product(db, data)
@@ -22,9 +22,12 @@ def create_product(data: ProductCreate, db: Session = Depends(get_db)):
 def get_all_products(db: Session = Depends(get_db)):
   return ProductService.list_product(db)
 # Cập nhật sản phẩm
-@router.put("/{product_id}", response_model=ProductResponse)
+@router.patch("/{product_id}", response_model=ProductResponse)
 def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
-    updated_product = ProductService.update_product(db, product_id, data)
-    if not updated_product:
+    return ProductService.update_product(db, product_id, data)
+@router.delete("/{product_id}", response_model=ProductResponse)
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    deleted_product = ProductService.delete_product(db, product_id)
+    if not deleted_product:
         raise HTTPException(status_code=404, detail="Product not found")
-    return updated_product
+    return deleted_product
