@@ -21,4 +21,4 @@ SessionLocal = sessionmaker(
     bind=engine
 ) # giúp tạo session cho mỗi request
 
-Base = declarative_base()
+Base = declarative_base() # cơ sở cho tất cả các mô hình ORM

@@ -2,10 +2,7 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from app.core.database import engine
 from app.core.database import Base
-from app.products.model import Product
-from app.categories.model import Category
 
 target_metadata = Base.metadata
 

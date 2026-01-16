@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from app.products.model import Product
 from app.products.repository import ProductRepository
 from app.categories.repository import CategoryRepository
@@ -12,7 +13,10 @@ class ProductService:
             if not category:
                 raise HTTPException(status_code=400, detail="Category does not exist")
         product = Product(**data.dict())
-        return ProductRepository.create(db, product)
+        ProductRepository.create(db, product)
+        db.commit()
+        db.refresh(product)
+        return product
 
     @staticmethod
     def update_product(db, product_id, data):
@@ -31,16 +35,23 @@ class ProductService:
         for field, value in update_data.items():
             setattr(product, field, value) # gán giá trị mới cho các field được cập nhật
 
-        return ProductRepository.update(db, product)
+        ProductRepository.update(db, product)
+        db.commit()
+        db.refresh(product)
+        return product
     @staticmethod
     def delete_product(db, product_id):
         product = ProductRepository.get_by_id(db, product_id)
 
         if not product:
             return None
-
-        return ProductRepository.delete(db, product)
+        product.is_active = False
+        product.deleted_at = datetime.now(timezone.utc)
+        ProductRepository.update(db, product)
+        db.commit()
+        db.refresh(product)
+        return product
 
     @staticmethod
     def list_product(db):
-        return ProductRepository.list(db)
+        return ProductRepository.list_active(db)

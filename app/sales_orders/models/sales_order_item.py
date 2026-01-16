@@ -1,0 +1,3 @@
+class SalesOrder(Base):
+  id
+ 

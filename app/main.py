@@ -11,7 +11,7 @@ app.include_router(
     tags=["Products"]
 )
 from app.categories.router import router as category_router
-app.include_router(
+app.include_router( 
     category_router,
     prefix="/categories",
     tags=["Categories"]

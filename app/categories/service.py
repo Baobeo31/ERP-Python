@@ -1,38 +1,60 @@
+from datetime import datetime, timezone
+from fastapi import HTTPException
 from app.categories.model import Category
 from app.categories.repository import CategoryRepository
-from fastapi import HTTPException
+
 class CategoryService:
 
-  @staticmethod
-  def create_category(db, data):
+    @staticmethod
+    def create_category(db, data):
         if CategoryRepository.get_by_name(db, data.name):
-            raise HTTPException(status_code=400, detail="Category name already exists")
-        category = Category(**data.dict())
-        return CategoryRepository.create(db, category)
-  
-  @staticmethod
-  def update_category(db, category_id, data):
-      category = CategoryRepository.get_by_id(db, category_id)
+            raise HTTPException(
+                status_code=400,
+                detail="Category name already exists"
+            )
 
-      if not category:
-          raise HTTPException(status_code=404, detail="Category not found")
+        category = Category(**data.model_dump())
 
-      update_data = data.dict(exclude_unset=True)
+        CategoryRepository.create(db, category)
 
-      for key, value in update_data.items():
-          setattr(category, key, value) # gán giá trị mới cho các field được cập nhật
+        db.commit()
+        db.refresh(category)
 
-      return CategoryRepository.update(db, category)
-  
-  @staticmethod
-  def delete_category(db, category_id):
-      category = CategoryRepository.get_by_id(db, category_id)
+        return category
 
-      if not category:
-          raise HTTPException(status_code=404, detail="Category not found")
+    @staticmethod
+    def update_category(db, category_id, data):
+        category = CategoryRepository.get_by_id(db, category_id)
 
-      return CategoryRepository.delete(db, category)
-  
-  @staticmethod
-  def list_categories(db):
-      return CategoryRepository.get_all(db)
+        if not category or not category.is_active:
+            raise HTTPException(status_code=404, detail="Category not found")
+
+        for key, value in data.model_dump(exclude_unset=True).items():
+            setattr(category, key, value)
+
+        CategoryRepository.update(db, category)
+
+        db.commit()
+        db.refresh(category)
+
+        return category
+
+    @staticmethod
+    def delete_category(db, category_id):
+        category = CategoryRepository.get_by_id(db, category_id)
+
+        if not category or not category.is_active:
+            raise HTTPException(status_code=404, detail="Category not found")
+
+        category.is_active = False
+        category.deleted_at = datetime.now(timezone.utc)
+
+        CategoryRepository.update(db, category)
+
+        db.commit()
+
+        return category
+
+    @staticmethod
+    def list_categories(db):
+        return CategoryRepository.list_active(db)
