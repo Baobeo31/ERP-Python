@@ -21,13 +21,13 @@ def create_product(data: ProductCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=list[ProductResponse])
 def get_all_products(db: Session = Depends(get_db)):
   return ProductService.list_product(db)
+
 # Cập nhật sản phẩm
 @router.patch("/{product_id}", response_model=ProductResponse)
 def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
     return ProductService.update_product(db, product_id, data)
+
 @router.delete("/{product_id}", response_model=ProductResponse)
 def delete_product(product_id: int, db: Session = Depends(get_db)):
-    deleted_product = ProductService.delete_product(db, product_id)
-    if not deleted_product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return deleted_product
+    return ProductService.delete_product(db, product_id)
+    

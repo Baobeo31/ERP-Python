@@ -130,3 +130,9 @@ class InventoryService:
     inventory.quantity = new_quantity
     db.commit()
     return inventory
+  
+  def check_available(db, product_id: int, warehouse_id: int, quantity: int):
+    inventory = InventoryRepository.get(db, product_id, warehouse_id)
+    if not inventory:
+      return False
+    return inventory.quantity >= quantity
